@@ -1,0 +1,28 @@
+flowchart TD
+    inicio([Inicio]) --> solicitud["Estudiante registra los datos de la solicitud"]
+    solicitud --> consulta["Consultar la lista fija de salas disponibles"]
+    consulta --> estrategia["Strategy: seleccionar por capacidad o sala preferida"]
+    estrategia --> adecuada{"¿Existe una sala adecuada?"}
+    adecuada -->|No| sinSala["Rechazar solicitud: sin reserva ni notificaciones"]
+    sinSala --> finRechazo([Fin de solicitud rechazada])
+    adecuada -->|Sí| builder["Builder: construir la reserva y validar sus datos"]
+    builder --> datosValidos{"¿Datos válidos?"}
+    datosValidos -->|No| datosIncorrectos["Rechazar construcción: sin reserva ni notificaciones"]
+    datosIncorrectos --> finRechazo
+    datosValidos -->|Sí| pendiente["Reserva creada en estado Pendiente"]
+    pendiente --> facade["Facade: registrar reserva y solicitar confirmación"]
+    facade --> confirmar["Solicitar transición a Confirmada"]
+    confirmar --> state["State: validar transición desde el estado actual"]
+    state --> transicionValida{"¿Transición válida?"}
+    transicionValida -->|No| rechazarCambio["Rechazar cambio: conservar estado y no emitir notificación por el intento"]
+    rechazarCambio --> finIntento([Fin del intento])
+    transicionValida -->|Sí| cambiar["Aplicar el nuevo estado"]
+    cambiar --> observer["Observer: comunicar el cambio a los suscriptores"]
+    observer --> terminal{"¿Estado Cancelada o Finalizada?"}
+    terminal -->|Sí| finReserva([Fin de la reserva])
+    terminal -->|No| accion{"¿El estudiante solicita otra acción?"}
+    accion -->|Cancelar| cancelar["Solicitar transición a Cancelada"]
+    accion -->|Finalizar| finalizar["Solicitar transición a Finalizada"]
+    accion -->|No| finInteraccion([Fin de la interacción])
+    cancelar --> state
+    finalizar --> state
